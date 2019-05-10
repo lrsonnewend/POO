@@ -11,26 +11,35 @@ public class Principal {
 		
 		do {
 		op = Integer.parseInt(JOptionPane.showInputDialog("CONTROLADOR DE ESTOQUE\n"
-				+ "1 - Cadastrar produto\n2 - Visualizar produtos\n3 - Sair"));
+				+ "1 - Cadastrar produto\n2 - Visualizar produtos\n3 - Remover"
+                        + " produto\n4 - Editar produto\n5 - Sair"));
 		
 		switch(op) {
 		case 1:
-			c+=1;
-			m1.addProduto();
-			break;
+                    c+=1;
+                    m1.addProduto();
+                    break;
 		
 		case 2:
-			m1.imprimirProd();
-			System.out.println("Quantidade de produtos cadastrados: "+c);
-			
-			break;
+                    m1.imprimirProd();
+                    System.out.println("Quantidade de produtos cadastrados: "+c);
+		    break;
 			
 		case 3:
-			System.exit(0);
-			break;
-		}
+                    m1.removeProd();
+                    c-=1;
+                    break;
+	
+                case 4:
+                    m1.editProd();
+                    break;
+                
+                case 5:
+                    System.exit(0);
+                    break;
+            }
 		
-	}while(op != 3);
-}
+	}while(op != 5);
+    }
 
 }

@@ -27,9 +27,45 @@ public class Metodos {
 	}
 	
 	public void imprimirProd() {
-		for(Produto produto:produtos) {
-			System.out.println("Produto: "+produto.getNomeProd()+
-					"\nQuantidade: "+produto.getQuant());
-		}
-	}
-}
+            System.out.println("LISTA DE PRODUTOS");
+            for(Produto produto:produtos) {
+                    
+                System.out.println("|Produto             |"+"Quantidade           |");
+                System.out.print(produto.getNomeProd());
+                System.out.println("                 "+produto.getQuant());
+                System.out.print("\n");
+            }
+        }
+        
+        public void removeProd(){
+            String nome = JOptionPane.showInputDialog("Insira o nome do "
+                    + "produto que deseja remover:");
+            
+            for (int i = 0; i < produtos.size(); i++){
+                if(produtos.get(i).getNomeProd().equals(nome)){
+                    produtos.remove(i);
+                    JOptionPane.showMessageDialog(null, "Produto excluído com sucesso!"); 
+                    break;
+                }                
+            }            
+        }    
+        
+        public void editProd(){
+            String nome = JOptionPane.showInputDialog("Insira o nome do "
+                    + "produto que deseja editar:");
+            
+            String editNome = JOptionPane.showInputDialog("Insira o novo nome "
+                    + "do produto:");
+            
+            int editQuant = Integer.parseInt(JOptionPane.showInputDialog("Insira a quantidade "
+                    + "do produto:"));
+            
+            for(int i = 0; i < produtos.size(); i++){
+                if(produtos.get(i).getNomeProd().equals(nome)){
+                    produtos.get(i).setNomeProd(editNome);
+                    produtos.get(i).setQuant(editQuant);
+                }
+                    
+            }
+        }
+    }

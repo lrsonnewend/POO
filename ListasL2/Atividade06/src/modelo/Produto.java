@@ -1,23 +1,27 @@
 package modelo;
 
+/**
+ *
+ * @author lucas
+ */
 public class Produto {
-	private String nomeProd;
-	private int quant;
+    private String nomeProd;
+    private int quant;
 
-	public String getNomeProd() {
-		return nomeProd;
-	}
+    public String getNomeProd() {
+	return nomeProd;
+    }
 	
-	public void setNomeProd(String nomeProd) {
-		this.nomeProd = nomeProd;
-	}
+    public void setNomeProd(String nomeProd) {
+    	this.nomeProd = nomeProd;
+    }
 	
-	public int getQuant() {
-		return quant;
-	}
+    public int getQuant() {
+	return quant;
+    }
 	
-	public void setQuant(int quant) {
-		this.quant = quant;
-	}
+    public void setQuant(int quant) {
+	this.quant = quant;
+    }
 
 }
