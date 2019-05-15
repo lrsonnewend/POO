@@ -2,13 +2,17 @@ package engine;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JOptionPane;
-
+import java.io.*;
+import java.lang.*;
 import modelo.Produto;
 
+
+
 public class Metodos {
+        private int c = 0;
 	private List <Produto> produtos = new ArrayList<Produto>();
+        
 	public List<Produto> getProdutos(){
 		return produtos;
 	}
@@ -24,17 +28,20 @@ public class Metodos {
 		p.setQuant(Integer.parseInt(JOptionPane.showInputDialog("Insira a quantia deste produto:")));
 		
 		produtos.add(p);
+              
+                c+=1;
 	}
 	
 	public void imprimirProd() {
             System.out.println("LISTA DE PRODUTOS");
-            for(Produto produto:produtos) {
-                    
-                System.out.println("|Produto             |"+"Quantidade           |");
-                System.out.print(produto.getNomeProd());
-                System.out.println("                 "+produto.getQuant());
+            
+            for(Produto produto:produtos) {        
+                System.out.println("Produto\t"+"\tQuantidade");
+                System.out.print(produto.getNomeProd()+"\t"+"\t"+produto.getQuant());
                 System.out.print("\n");
             }
+            System.out.println("Quantidade de produtos cadastrados: "+c);
+
         }
         
         public void removeProd(){
@@ -47,7 +54,8 @@ public class Metodos {
                     JOptionPane.showMessageDialog(null, "Produto excluído com sucesso!"); 
                     break;
                 }                
-            }            
+            } 
+            c-=1;
         }    
         
         public void editProd(){
@@ -67,5 +75,24 @@ public class Metodos {
                 }
                     
             }
+        }
+        
+        public void salvaInfo() throws IOException{
+            BufferedWriter escreve = new BufferedWriter(new FileWriter("/home/lucas/Documentos/info.txt"));
+            for (Produto produto:produtos){
+                String prod = produto.getNomeProd();
+                String quant = String.valueOf(produto.getQuant());
+                escreve.write("Produto: "+prod);
+                escreve.newLine();
+                escreve.write("Quantidade: "+quant);
+                escreve.newLine();
+                escreve.newLine();
+                           
+            }
+            
+            escreve.write("Quantidade de produtos cadastrados: "+c);
+            JOptionPane.showMessageDialog(null,"Dados salvos!");
+            escreve.flush();
+            escreve.close();
         }
     }
