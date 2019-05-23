@@ -1,49 +1,91 @@
 package conexoes;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.Socket;
-import javax.swing.*;
+import java.io.*;
+import java.net.*;
 
-public class Cliente extends JFrame implements ActionListener, KeyListener{
-	private Socket socketCliente;
-	private static final long serialVersionUID = 1L;
-	private JTextArea texto;
-	private JTextField txtMsg;
-	private JButton btnSend;
-	private JButton btnSair;
-	private JLabel lblHistorico;
-	private JLabel lblMsg;
-	private JPanel pnlContent;
-	private OutputStream ou ;
-	private Writer ouw; 
-	private BufferedWriter bfw;
-	private JTextField txtIP;
-	private JTextField txtPorta;
-	private JTextField txtNome;
-	
-	public Cliente() throws Exception{
-		System.out.println("Fazendo conexão");
-		socketCliente = new Socket("172.16.3.61", 999);	
-	}
-	
-	public void conectar() throws Exception{
-		PrintWriter escritor = new PrintWriter(socketCliente.getOutputStream());
-		System.out.println("tá indo...");
-		System.out.println("Enviado para o servidor!");
-		escritor.write("SAUVESKATEBOARD");
-		escritor.close();
+public class Cliente extends Thread {
+// Flag que indica quando se deve terminar a execução.
+	private static boolean done = false;
+
+	public static void main(String args[]) {
+		try {
+			// Para se conectar a algum servidor, basta se criar um
+			// objeto da classe Socket. O primeiro parâmetro é o IP ou
+			// o endereço da máquina a qual se quer conectar e o
+			// segundo parâmetro é a porta da aplicação. Neste caso,
+			// utiliza-se o IP da máquina local (127.0.0.1) e a porta
+			// da aplicação ServidorDeChat. Nada impede a mudança
+			// desses valores, tentando estabelecer uma conexão com
+			// outras portas em outras máquinas.
+			Socket conexao = new Socket("127.0.0.1", 2222);
+
+			// uma vez estabelecida a comunicação, deve-se obter os
+			// objetos que permitem controlar o fluxo de comunicação
+			PrintStream saida = new PrintStream(conexao.getOutputStream());
+			// enviar antes de tudo o nome do usuário
+			BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
+			System.out.print("Entre com o seu nome: ");
+			String meuNome = teclado.readLine();
+			saida.println(meuNome);
+
+			// Uma vez que tudo está pronto, antes de iniciar o loop
+			// principal, executar a thread de recepção de mensagens.
+			Thread t = new Cliente(conexao);
+			t.start();
+
+			// loop principal: obtendo uma linha digitada no teclado e
+			// enviando-a para o servidor.
+			String linha;
+			while (true) {
+				// ler a linha digitada no teclado
+				System.out.print("> ");
+				linha = teclado.readLine();
+				// antes de enviar, verifica se a conexão não foi fechada
+				if (done) {
+					break;
+				}
+				// envia para o servidor
+				saida.println(linha);
+			}
+		} catch (IOException e) {
+			// Caso ocorra alguma excessão de E/S, mostre qual foi.
+			System.out.println("IOException: " + e);
+		}
 	}
 
+	// parte que controla a recepção de mensagens deste cliente
+	private Socket conexao;
+	// construtor que recebe o socket deste cliente
+
+	public Cliente(Socket s) {
+		conexao = s;
+	}
+
+	// execução da thread
+	public void run() {
+		try {
+			BufferedReader entrada = new BufferedReader(new InputStreamReader(conexao.getInputStream()));
+			String linha;
+			while (true) {
+				// pega o que o servidor enviou
+				linha = entrada.readLine();
+				// verifica se é uma linha válida. Pode ser que a conexão
+				// foi interrompida. Neste caso, a linha é null. Se isso
+				// ocorrer, termina-se a execução saindo com break
+				if (linha == null) {
+					System.out.println("Conexão encerrada!");
+					break;
+				}
+				// caso a linha não seja nula, deve-se imprimi-la
+				System.out.println();
+				System.out.println(linha);
+				System.out.print("...> ");
+			}
+		} catch (IOException e) {
+			// caso ocorra alguma exceção de E/S, mostre qual foi.
+			System.out.println("IOException: " + e);
+		}
+		// sinaliza para o main que a conexão encerrou.
+		done = true;
+	}
 }
