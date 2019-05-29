@@ -3,44 +3,49 @@ package conexoes;
 import java.io.*;
 import java.net.*;
 
-public class Cliente extends Thread {
-// Flag que indica quando se deve terminar a execução.
-	private static boolean done = false;
+import javax.swing.JOptionPane;
 
+public class Cliente extends Thread {
+// Flag que indica quando se deve terminar a execuï¿½ï¿½o.
+	private static boolean done = false;
+	static int chaveCrip = 10234;
 	public static void main(String args[]) {
 		try {
 			// Para se conectar a algum servidor, basta se criar um
-			// objeto da classe Socket. O primeiro parâmetro é o IP ou
-			// o endereço da máquina a qual se quer conectar e o
-			// segundo parâmetro é a porta da aplicação. Neste caso,
-			// utiliza-se o IP da máquina local (127.0.0.1) e a porta
-			// da aplicação ServidorDeChat. Nada impede a mudança
-			// desses valores, tentando estabelecer uma conexão com
-			// outras portas em outras máquinas.
-			Socket conexao = new Socket("127.0.0.1", 2222);
+			// objeto da classe Socket. O primeiro parï¿½metro ï¿½ o IP ou
+			// o endereï¿½o da mï¿½quina a qual se quer conectar e o
+			// segundo parï¿½metro ï¿½ a porta da aplicaï¿½ï¿½o. Neste caso,
+			// utiliza-se o IP da mï¿½quina local (127.0.0.1) e a porta
+			// da aplicaï¿½ï¿½o ServidorDeChat. Nada impede a mudanï¿½a
+			// desses valores, tentando estabelecer uma conexï¿½o com
+			// outras portas em outras mï¿½quinas.
+			Socket conexao = new Socket("127.0.0.1",2222);
 
-			// uma vez estabelecida a comunicação, deve-se obter os
-			// objetos que permitem controlar o fluxo de comunicação
+			// uma vez estabelecida a comunicaï¿½ï¿½o, deve-se obter os
+			// objetos que permitem controlar o fluxo de comunicaï¿½ï¿½o
 			PrintStream saida = new PrintStream(conexao.getOutputStream());
-			// enviar antes de tudo o nome do usuário
+			// enviar antes de tudo o nome do usuï¿½rio
 			BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print("Entre com o seu nome: ");
 			String meuNome = teclado.readLine();
 			saida.println(meuNome);
 
-			// Uma vez que tudo está pronto, antes de iniciar o loop
-			// principal, executar a thread de recepção de mensagens.
+			// Uma vez que tudo estï¿½ pronto, antes de iniciar o loop
+			// principal, executar a thread de recepï¿½ï¿½o de mensagens.
 			Thread t = new Cliente(conexao);
 			t.start();
 
 			// loop principal: obtendo uma linha digitada no teclado e
 			// enviando-a para o servidor.
 			String linha;
+
 			while (true) {
 				// ler a linha digitada no teclado
 				System.out.print("> ");
 				linha = teclado.readLine();
-				// antes de enviar, verifica se a conexão não foi fechada
+				//linha = encriptar(chaveCrip, linha);
+
+				// antes de enviar, verifica se a conexï¿½o nï¿½o foi fechada
 				if (done) {
 					break;
 				}
@@ -48,44 +53,99 @@ public class Cliente extends Thread {
 				saida.println(linha);
 			}
 		} catch (IOException e) {
-			// Caso ocorra alguma excessão de E/S, mostre qual foi.
+			// Caso ocorra alguma excessï¿½o de E/S, mostre qual foi.
 			System.out.println("IOException: " + e);
 		}
 	}
 
-	// parte que controla a recepção de mensagens deste cliente
+	// parte que controla a recepï¿½ï¿½o de mensagens deste cliente
 	private Socket conexao;
 	// construtor que recebe o socket deste cliente
 
 	public Cliente(Socket s) {
 		conexao = s;
 	}
+	
+	public static String encriptar(int chave, String texto){
+        // Variavel que ira guardar o texto crifrado
+        StringBuilder textoCifrado = new StringBuilder();
+        // Variavel com tamanho do texto a ser encriptado
+        int tamanhoTexto = texto.length();
 
-	// execução da thread
+        // Criptografa cada caracter por vez 
+        for(int c=0; c < tamanhoTexto; c++){
+           // Transforma o caracter em codigo ASCII e faz a criptografia
+           int letraCifradaASCII = ((int) texto.charAt(c)) + chave;
+
+           // Verifica se o codigo ASCII esta no limite dos caracteres imprimiveis
+           while(letraCifradaASCII > 126)
+              letraCifradaASCII -= 94;
+
+           // Transforma codigo ASCII criptografado em caracter ao novo texto
+           textoCifrado.append( (char)letraCifradaASCII );
+        }
+
+        // Por fim retorna a mensagem criptografada por completo
+        return textoCifrado.toString();
+        }
+
+	 public String decriptar(int chave, String textoCifrado){
+	      // Variavel que ira guardar o texto decifrado
+	      StringBuilder texto = new StringBuilder();
+	      // Variavel com tamanho do texto a ser decriptado
+	      int tamanhoTexto = textoCifrado.length();
+	      
+	      // Descriptografa cada caracter por vez
+	      for(int c=0; c < tamanhoTexto; c++){
+	         // Transforma o caracter em codigo ASCII e faz a descriptografia
+	         int letraDecifradaASCII = ((int) textoCifrado.charAt(c)) - chave;
+	         
+	         // Verifica se o codigo ASCII esta no limite dos caracteres imprimiveis
+	         while(letraDecifradaASCII < 32)
+	            letraDecifradaASCII += 94;
+
+	         // Transforma codigo ASCII descriptografado em caracter ao novo texto
+	         texto.append( (char)letraDecifradaASCII );
+	      }
+	      
+	      // Por fim retorna a mensagem descriptografada por completo
+	      return texto.toString();
+	   }
+	      
+	// execuï¿½ï¿½o da thread
 	public void run() {
+
 		try {
+
 			BufferedReader entrada = new BufferedReader(new InputStreamReader(conexao.getInputStream()));
-			String linha;
+			String linha, linhaCrip;
+                        String linhaOut;
 			while (true) {
 				// pega o que o servidor enviou
-				linha = entrada.readLine();
-				// verifica se é uma linha válida. Pode ser que a conexão
-				// foi interrompida. Neste caso, a linha é null. Se isso
-				// ocorrer, termina-se a execução saindo com break
+				linha = entrada.readLine();    
+				linhaCrip = encriptar(chaveCrip,linha);
+                                linhaOut = decriptar(chaveCrip, linhaCrip);
+                                System.out.println();
+                                System.out.println(linhaOut);
+                                System.out.print("...> ");
+
+                                
+                             
+                                    
+				// verifica se ï¿½ uma linha vï¿½lida. Pode ser que a conexï¿½o
+				// foi interrompida. Neste caso, a linha ï¿½ null. Se isso
+				// ocorrer, termina-se a execuï¿½ï¿½o saindo com break
 				if (linha == null) {
-					System.out.println("Conexão encerrada!");
+					System.out.println("Conexï¿½o encerrada!");
 					break;
 				}
-				// caso a linha não seja nula, deve-se imprimi-la
-				System.out.println();
-				System.out.println(linha);
-				System.out.print("...> ");
+				// caso a linha nï¿½o seja nula, deve-se imprimi-la				
 			}
 		} catch (IOException e) {
-			// caso ocorra alguma exceção de E/S, mostre qual foi.
+			// caso ocorra alguma exceï¿½ï¿½o de E/S, mostre qual foi.
 			System.out.println("IOException: " + e);
 		}
-		// sinaliza para o main que a conexão encerrou.
+		// sinaliza para o main que a conexï¿½o encerrou.
 		done = true;
 	}
 }

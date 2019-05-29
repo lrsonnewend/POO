@@ -75,6 +75,7 @@ public class Servidor extends Thread {
 			// Verificar se linha é null (conexão interrompida)
 			// Se não for nula, pode-se compará-la com métodos string
 			String linha = entrada.readLine();
+			
 			while (linha != null && !(linha.trim().equals(""))) {
 				// reenvia a linha para todos os clientes conectados
 				sendToAll(saida, " disse: ", linha);
